@@ -22,10 +22,10 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 public class ProductController implements HealthIndicator {
     @Autowired
-    ProductDao productDao ;
+    ProductDao productDao;
 
     @Autowired
-    ApplicationpropertiesConfiguration applicationpropertiesConfiguration ;
+    ApplicationpropertiesConfiguration applicationpropertiesConfiguration;
 
     @Override
     public Health health() {
@@ -37,11 +37,10 @@ public class ProductController implements HealthIndicator {
         return Health.up().build();
     }
 
+    @GetMapping("/Produits")
     public List<Product> listeDesProduits() {
-
-
-            return productDao.findAll();
-        };
+        return productDao.findAll();
+    }
 
     @GetMapping("/Produits/{id}")
     public Product getProductById(@PathVariable Long id) {
@@ -49,16 +48,13 @@ public class ProductController implements HealthIndicator {
                 .orElseThrow(() -> new ProductNotFoundException("Produit avec l'id " + id + " n'existe pas"));
     }
 
-    public CompletableFuture<List<Product>> fallbackListeDesProduits(Throwable t) {
-        System.out.println("Appel du fallback : " + t.getMessage());
-        return CompletableFuture.completedFuture(Collections.emptyList());
-    }
-    //creer un produit
+    // Create a product
     @PostMapping("/Produits")
     public Product createProduct(@RequestBody Product product) {
         return productDao.save(product);
     }
-    //modifier un produit :
+
+    // Update a product
     @PutMapping("/Produits/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
         Optional<Product> existingProduct = productDao.findById(id);
@@ -75,7 +71,8 @@ public class ProductController implements HealthIndicator {
         productDao.save(product);
         return ResponseEntity.ok(product);
     }
-    // supprimer un produit
+
+    // Delete a product
     @DeleteMapping("/Produits/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         if (productDao.existsById(id)) {
@@ -85,7 +82,4 @@ public class ProductController implements HealthIndicator {
             return ResponseEntity.notFound().build();
         }
     }
-
-
-
 }
