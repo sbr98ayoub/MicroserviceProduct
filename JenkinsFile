@@ -27,13 +27,14 @@ pipeline {
                 sh '${MAVEN_HOME}/bin/mvn test'
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') { // Name matches the server name in Jenkins
-                    sh "${MAVEN_HOME}/bin/mvn sonar:sonar"
+                withSonarQubeEnv('SonarCube') { // Replace with the name of your SonarQube server
+                    sh '${MAVEN_HOME}/bin/mvn sonar:sonar'
                 }
             }
+    }
+
     }
 
     post {
