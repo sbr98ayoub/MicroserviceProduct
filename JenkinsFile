@@ -4,6 +4,7 @@ pipeline {
     environment {
         MAVEN_HOME = "C:/Users/Toshiba/Downloads/apache-maven-3.9.9-bin/apache-maven-3.9.9"
         PATH = "${env.MAVEN_HOME}/bin:${env.PATH}"
+        DOCKER_IMAGE= "ayoubsbr/microserviceproducts:latest"
     }
 
     stages {
@@ -29,11 +30,36 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') { // Replace with the name of your SonarQube server
+                withSonarQubeEnv('SonarQube') {
                     sh '${MAVEN_HOME}/bin/mvn sonar:sonar'
                 }
             }
-    }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                        sh "docker push ${DOCKER_IMAGE}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Docker Container') {
+            steps {
+                script {
+                    // Stop and remove existing container (if any)
+                    sh "docker stop microserviceproducts-container || true"
+                    sh "docker rm microserviceproducts-container || true"
+
+                    // Run the new container
+                    sh "docker run -d -p 8080:8080 --name microserviceproducts-container ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+
 
     }
 
