@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_HOME = "C:/Users/Toshiba/Downloads/apache-maven-3.9.9-bin/apache-maven-3.9.9"
+        PATH = "${env.MAVEN_HOME}/bin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Cloning the code from your GitHub repository
+                    git branch: 'main', url: 'https://github.com/sbr98ayoub/MicroserviceProduct.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Building the project with Maven
+                sh '${MAVEN_HOME}/bin/mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Running tests with Maven
+                sh '${MAVEN_HOME}/bin/mvn test'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'Build and tests succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
+}
